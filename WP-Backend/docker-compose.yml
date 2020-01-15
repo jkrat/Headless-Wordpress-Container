@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  publicsite-db:
+    container_name: publicsite-db
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE=${WORDPRESS_DB_NAME}
+      - MYSQL_PASSWORD=${WORDPRESS_DB_PASSWORD}
+      - MYSQL_USER=${WORDPRESS_DB_USER}
+    image: mariadb
+    ports:
+      - '3307:3306'
+  publicsite-wp:
+    build: .
+    command: bash -c 'install_wordpress && apache2-foreground'
+    container_name: publicsite-wp
+    depends_on:
+      - publicsite-db
+    env_file: ./.env
+    ports:
+      - '8080:8080'
+    user: www-data
+    volumes:
+      - ./wordpress:/var/www/html
+      - ./docker/install_wordpress.sh:/usr/local/bin/install_wordpress
